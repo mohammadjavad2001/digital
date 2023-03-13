@@ -14,8 +14,8 @@ class UserManager(BaseUserManager):
         if not username:
             raise ValueError("The given username must be set")
         email = self.normalize_email(email)
-        user = self.model(phone_number=phone_number,username=username,email=email,
-                          is_staff=is_staff,is_active=True,is_superuser=is_superuser,date_joined=now,**extra_fields)    
+        user = self.model(phone_number=phone_number,username=username,
+                          email=email,is_staff=is_staff,is_active=True,is_superuser=is_superuser,date_joined=now,**extra_fields)    
         if not extra_fields.get('no password'):
             user.set_password(password)
         user.save(using=self._db)
@@ -31,7 +31,7 @@ class UserManager(BaseUserManager):
                 username += str(random.randint(10,99))
         return self._create_user(username,phone_number,email,password,False,False,**extra_fields)
     
-    def create_superuser(self,username,phone_number,email,password,**extra_fields):            
+    def create_superuser(self,username,phone_number,email,password,**extra_fields):  
         return self._create_user(username,phone_number,email,password,True,True,**extra_fields)
         
 
@@ -70,7 +70,7 @@ class UserProfile(models.Model):
     nick_name = models.CharField(_('nick_name'),max_length=150,blank = True)
     avatar = models.ImageField(_('avatar'),blank=True)
     birthday = models.DateField(_('birthday'),null=True,blank=True)
-    gender = models.BooleanField(_('gender'),help_text=_('female is false , male is true,null is unset'))
+    gender = models.BooleanField(_('gender'),help_text=_('female is false , male is true,null is unset'),null=True)
     province = models.ForeignKey(verbose_name=_('province'),to ='Province',null=True,on_delete=models.SET_NULL)
     #email = models.EmailField(_("email address"),blank=True)
     #phone_numner = models.BigIntegerField(_("mobile number"),unique = True,null=True,null = True, blank=True,

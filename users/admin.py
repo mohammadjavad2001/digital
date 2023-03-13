@@ -14,7 +14,7 @@ class MyUserAdmin(UserAdmin):
                             'fields':('username','phone_number','password1','password2'),
                             }),
     )
-    list_display = ('username','phone_number','email','is_staff')
+    list_display = ('username','phone_number','is_staff')
 
     search_fields =('username_exact',)
     ordering = ('-id',)
