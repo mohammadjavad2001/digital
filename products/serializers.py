@@ -18,8 +18,8 @@ class FileSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
     #HyperlinkedModelSerializer yek parameter jadid migirad be nam url ke khodesh bar asas esmi ke da r urls.py dade shode baraye in view url misaze 
     categories = CategorySerializer(many=True)
-    files= FileSerializer(many =True)
-    foo = serializers.SerializerMethodField()
+    #files= FileSerializer(many =True)
+    #foo = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = ('id','title','description','avatar','categories','files','foo','url')                    

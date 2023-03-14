@@ -2,6 +2,8 @@ from django.db import models
 import random
 from django.utils.translation import gettext_lazy as _
 from wsgiref.validate import validator
+from django.core import validators
+
 from django.core.validators import RegexValidator
 from django.core.validators import BaseValidator
 from django.core.mail import send_mail
@@ -15,7 +17,8 @@ class UserManager(BaseUserManager):
             raise ValueError("The given username must be set")
         email = self.normalize_email(email)
         user = self.model(phone_number=phone_number,username=username,
-                          email=email,is_staff=is_staff,is_active=True,is_superuser=is_superuser,date_joined=now,**extra_fields)    
+                          email=email,is_staff=is_staff,is_active=True,
+                          is_superuser=is_superuser,date_joined=now,**extra_fields)    
         if not extra_fields.get('no password'):
             user.set_password(password)
         user.save(using=self._db)
@@ -24,7 +27,7 @@ class UserManager(BaseUserManager):
         if username is None:#bebinim username dade ya  na 
             if email:
                 username = email.split('@',1)[0] #agar username nadad bayad khodemoon barash besazim 
-        
+                          
             if phone_number:
                 username = random.choice ('abcdefghijklmnopqrstuvwxyz')+str(phone_number)[-7:]
             while User.objects.filter(username=username).exists():
@@ -33,7 +36,8 @@ class UserManager(BaseUserManager):
     
     def create_superuser(self,username,phone_number,email,password,**extra_fields):  
         return self._create_user(username,phone_number,email,password,True,True,**extra_fields)
-        
+    def get_by_phone_number(self,phone_number):
+        return self.get(**{'phone_number':phone_number})    
 
 class User(AbstractBaseUser,PermissionsMixin):
     #avstract basre class implement a fully featured user model with admin compliant permissions
@@ -45,7 +49,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     last_name = models.CharField(_("last name"), max_length=30,blank=True)
     email = models.EmailField(_("email address"),unique=True,null=True,blank=True )
     phone_number = models.BigIntegerField(_("mobile number"),unique = True,null = True, blank=True,
-                                          validators=[RegexValidator(r'^989[0-3,9]\d(8)$',('Enter a valid mobile number')),],
+                                          validators=[validators.RegexValidator(r'^989[0-3,9]\d{8}$',('Enter a valid mobile number')),],
                                           error_messages={'unique':_("A user with this mobile number already exists.")})
     is_staff = models.BooleanField(_("staff status"),default=False,help_text=_('Designates wheather the user can log into this admin site,'))
     is_active = models.BooleanField(_("active"),default=True,help_text=_('Designated whether this user should be treared as active,unset this instead of deleting accounts'))
@@ -54,7 +58,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     objects = UserManager()
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELD = ['email','phone_number']
+    REQUIRED_FIELDS = ['email','phone_number']
     class Meta:
         db_table = 'users'
         verbose_name =_('user')
@@ -63,8 +67,17 @@ class User(AbstractBaseUser,PermissionsMixin):
         full_name = '%s %s' %(self.first_name,self.last_name)        
     def get_short_name(self):
         return self.first_name
-    def email_user(self,subject,message,from_email=None,**kwargd):
-        send_mail()
+    def email_user(self,subject,message,from_email=None,**kwargs):
+        send_mail(subject,message,from_email,[self.email],**kwargs)
+    def is_loggedin_user(self):
+        #return tru if user has atually logged in with valid credentials
+        return  self.phone_number is not None or self.email is not None
+    
+    def save(self,*args,**kwargs):
+        if self.email is not None and self.email.strip() == '':
+            self.email = None
+        super().save(*args,**kwargs)
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     nick_name = models.CharField(_('nick_name'),max_length=150,blank = True)

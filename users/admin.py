@@ -14,7 +14,7 @@ class MyUserAdmin(UserAdmin):
                             'fields':('username','phone_number','password1','password2'),
                             }),
     )
-    list_display = ('username','phone_number','is_staff')
+    list_display = ('username','is_staff','phone_number')
 
     search_fields =('username_exact',)
     ordering = ('-id',)
@@ -28,6 +28,8 @@ class MyUserAdmin(UserAdmin):
         else:
             queryset |= self.model.objects.filter(phone_number = search_term_as_int )
         return queryset,may_have_duplicates
+    
+
 admin.site.unregister(Group)
 admin.site.register(Province)
 admin.site.register(User,MyUserAdmin)

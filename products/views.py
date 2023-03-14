@@ -3,15 +3,21 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Category,Product,File
+from rest_framework.permissions import IsAuthenticated
 from .serializers import CategorySerializer,ProductSerializer,FileSerializer
 
 # Create your views here.
 class ProductListView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
+        print(request.auth)
+        print(request.user)
         products = Product.objects.all()
         serializer = ProductSerializer(products,many = True,context={'request':request}) 
         return Response(serializer.data) 
 class ProductDetailView(APIView):
+
     def get(self,request,pk):
         try:
             product = Product.objects.get(pk=pk)
