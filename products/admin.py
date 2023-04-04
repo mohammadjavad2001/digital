@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Product,File,Category
 
+from import_export.admin import ImportExportModelAdmin
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -15,7 +16,7 @@ class FileInlineAdmin(admin.StackedInline):
     extra = 0
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ['title','is_enable','created_time']
     list_filter = ['is_enable']
     search_fields = ['title'] 
